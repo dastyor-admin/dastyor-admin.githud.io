@@ -11,6 +11,7 @@
 <title>DyorDast — Поиск работы</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ══════════════════════════════════════
    ROOT VARIABLES
@@ -1441,7 +1442,7 @@ function confirmTez() { closeM('m-tez'); openM('m-success'); }
 /* ══════════════════════════════════════
    SUBMIT AD
 ══════════════════════════════════════ */
-function submitAd() {
+async function submitAd() {
   try {
     // 1. Login tekshiruvi
     if (!user) {
@@ -1475,7 +1476,6 @@ function submitAd() {
 
     // 3. E'lon obyekti
     var ad = {
-      id:       Date.now(),
       title:    title,
       desc:     desc,
       price:    price,
@@ -1486,14 +1486,15 @@ function submitAd() {
       photos:   photos.slice(),
       tezkor:   wasTez,
       author:   (user && user.name) ? user.name : 'Foydalanuvchi',
-      phone:    (user && user.phone) ? user.phone : '',
-      date:     new Date().toLocaleDateString()
+      phone:    (user && user.phone) ? user.phone : ''
     };
 
-    // 4. Saqlash
-    var ads = getAds();
-    if (wasTez) { ads.unshift(ad); } else { ads.push(ad); }
-    saveAds(ads);
+    // 4. Supabase ga saqlash
+    const saved = await saveAdToSupabase(ad);
+    if (!saved) {
+      alert('E\'lonni saqlashda xato yuz berdi. Iltimos qayta urinib ko\'ring.');
+      return;
+    }
 
     // 5. Formani tozalash
     titleEl.value = '';
@@ -1591,19 +1592,59 @@ document.addEventListener('click', e => {
 function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
 function getUsers() { try { return JSON.parse(localStorage.getItem('dd_users')||'[]'); } catch(e){return[];} }
 function saveUsers(arr) { localStorage.setItem('dd_users', JSON.stringify(arr)); }
-function getAds() { try { return JSON.parse(localStorage.getItem('dd_ads')||'[]'); } catch(e){return[];} }
-function saveAds(arr) {
+
+/* ══════════════════════════════════════
+   SUPABASE: READ ADS
+══════════════════════════════════════ */
+async function getAdsFromSupabase() {
   try {
-    localStorage.setItem('dd_ads', JSON.stringify(arr));
-  } catch(e) {
-    // If storage full, save ads without photos
-    const light = arr.map(function(ad){ return Object.assign({}, ad, {photos:[]}); });
-    try { localStorage.setItem('dd_ads', JSON.stringify(light)); } catch(e2) {}
-    alert(lang==='ru'?'Объявление сохранено без фото (мало памяти)':lang==='en'?'Ad saved without photos (storage full)':'E\'lon rasmsiz saqlandi (xotira to\'la)');
-  }
+    const { data, error } = await window.supabaseClient
+      .from('ads')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) { console.error('Supabase getAds error:', error); return []; }
+    return data || [];
+  } catch(e) { console.error('getAdsFromSupabase exception:', e); return []; }
 }
 
-// Category emoji map
+/* ══════════════════════════════════════
+   SUPABASE: INSERT AD
+══════════════════════════════════════ */
+async function saveAdToSupabase(ad) {
+  try {
+    const { data, error } = await window.supabaseClient
+      .from('ads')
+      .insert([{
+        title:     ad.title,
+        desc:      ad.desc,
+        price:     ad.price,
+        city:      ad.city,
+        cat:       ad.cat,
+        cat_label: ad.catLabel,
+        loc_text:  ad.locText,
+        photos:    ad.photos,
+        tezkor:    ad.tezkor,
+        author:    ad.author,
+        phone:     ad.phone
+      }])
+      .select();
+    if (error) { console.error('Supabase saveAd error:', error); return null; }
+    return data ? data[0] : null;
+  } catch(e) { console.error('saveAdToSupabase exception:', e); return null; }
+}
+
+/* ══════════════════════════════════════
+   SUPABASE CONFIGURATION
+   ——————————————————————————————————————
+   Quyidagi o'zgaruvchilarga o'z
+   kalitlaringizni joylashtiring:
+   https://app.supabase.com → Settings → API
+══════════════════════════════════════ */
+const SUPABASE_URL      = 'YOUR_SUPABASE_URL_HERE';       // masalan: https://xyzxyz.supabase.co
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';  // masalan: eyJhbGci...
+
+window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const CAT_EMOJI = {home:'✨',field:'🌾',build:'🔨',help:'🤝',daily:'⏱️',master:'🔧',courier:'🚗',other:'📋'};
 
 // Sample/demo ads displayed before real ads exist
@@ -1640,10 +1681,11 @@ function makeAdCard(ad) {
   return card;
 }
 
-function renderAdsList() {
+async function renderAdsList() {
   const list = document.getElementById('ads-list');
   if (!list) return;
-  const userAds = getAds();
+  list.innerHTML = '<div class="empty" style="padding:40px 0 20px;"><div style="font-size:36px">⏳</div><div style="font-size:14px;color:var(--tx2);margin-top:8px">Yuklanmoqda...</div></div>';
+  const userAds = await getAdsFromSupabase();
   const allAds = userAds.length > 0 ? userAds : SAMPLE_ADS;
   const filtered = (currentCat === 'all')
     ? allAds
@@ -1659,10 +1701,6 @@ function renderAdsList() {
     if (cnt) cnt.textContent = '0 ta';
     return;
   }
-   const SUPABASE_URL = 'https://uuwgjnvbrovowkstjwms.supabase.co';
-  const SUPABASE_ANON_KEY = 'sb_publishable_NQ9WtFgaG0WteLIY-OHTNw_ZFcDsz57';
-  const _supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  window.supabaseClient = _supa;
   filtered.forEach(function(ad){ list.appendChild(makeAdCard(ad)); });
   const cnt = document.querySelector('.ads-cnt');
   if (cnt) cnt.textContent = filtered.length + ' ta';
