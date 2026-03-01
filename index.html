@@ -1707,6 +1707,8 @@ async function renderAdsList() {
 }
 const SUPABASE_URL = 'https://uuwgjnvbrovowkstjwms.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_NQ9WtFgaG0WteLIY-OHTNw_ZFcDsz57';
+  const _supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.supabaseClient = _supa;
 </script>
 </body>
 </html>
