@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1a7a3c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="DyorDast">
+<meta name="description" content="DyorDast — Ish topish va berish platformasi. Tojikiston va O'zbekiston.">
+<title>DyorDast — Поиск работы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ══════════════════════════════════════
+   ROOT VARIABLES
+══════════════════════════════════════ */
+:root{
+  --g:#1a7a3c;--gl:#e8f5ed;--gm:#2ca05a;
+  --or:#e67e22;--nv:#1a2e4a;
+  --gr:#f4f6f8;--gr2:#e0e4e8;
+  --tx:#1a2e4a;--tx2:#7a8a99;--wh:#fff;
+  --r:16px;--sh:0 2px 18px rgba(26,122,60,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:'Nunito',sans-serif;
+  background:#f0f4f2;color:var(--tx);
+  max-width:480px;margin:0 auto;
+  position:relative;overflow-x:hidden;
+  min-height:100vh;
+}
+
+/* ══════════════════════════════════════
+   SCREENS
+══════════════════════════════════════ */
+.screen{display:none;flex-direction:column;min-height:100vh;}
+.screen.active{display:flex;}
+
+/* ══════════════════════════════════════
+   SPLASH
+══════════════════════════════════════ */
+#screen-splash{
+  align-items:center;justify-content:center;
+  background:white;gap:10px;
+}
+.splash-tagline{color:var(--tx2);font-size:15px;font-weight:700;letter-spacing:.5px;}
+
+/* ══════════════════════════════════════
+   TOPBAR
+══════════════════════════════════════ */
+.topbar{
+  background:var(--wh);padding:12px 16px 10px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 1px 8px rgba(0,0,0,.07);
+  position:sticky;top:0;z-index:100;
+}
+.logo-svg{width:88px;height:36px;flex-shrink:0;}
+.search-box{
+  flex:1;display:flex;align-items:center;
+  background:var(--gr);border-radius:30px;
+  padding:8px 14px;gap:8px;
+}
+.search-box input{
+  border:none;background:transparent;outline:none;
+  font-family:inherit;font-size:14px;color:var(--tx);width:100%;
+}
+
+/* ══════════════════════════════════════
+   CONTENT
+══════════════════════════════════════ */
+.content{flex:1;overflow-y:auto;padding:14px 14px 84px;}
+.content::-webkit-scrollbar{display:none;}
+
+/* ══════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════ */
+.bot-nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;background:var(--wh);
+  display:flex;align-items:center;justify-content:space-around;
+  padding:8px 0 max(env(safe-area-inset-bottom),12px);
+  box-shadow:0 -2px 16px rgba(0,0,0,.08);z-index:200;
+}
+.ni{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;flex:1;font-size:11px;color:var(--tx2);
+  border:none;background:none;font-family:inherit;padding:4px 0;
+  transition:color .2s;
+}
+.ni.active{color:var(--g);}
+.ni svg{width:24px;height:24px;}
+.ni-add{
+  width:52px;height:52px;
+  background:linear-gradient(135deg,var(--or),#f39c12);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 18px rgba(230,126,34,.45);
+  cursor:pointer;border:none;margin-top:-20px;transition:transform .18s;
+}
+.ni-add:active{transform:scale(.93);}
+.ni-add svg{width:28px;height:28px;color:#fff;}
+
+/* ══════════════════════════════════════
+   AUTH
+══════════════════════════════════════ */
+.auth-wrap{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:30px 24px 40px;background:var(--wh);
+  overflow-y:auto;
+}
+.auth-title{font-size:22px;font-weight:900;color:var(--nv);margin-bottom:6px;text-align:center;}
+.auth-sub{font-size:14px;color:var(--tx2);margin-bottom:24px;text-align:center;line-height:1.5;}
+.auth-err{color:#e74c3c;font-size:13px;font-weight:700;text-align:center;margin-bottom:10px;
+  display:none;background:#fff0f0;padding:10px;border-radius:10px;width:100%;}
+.fld{width:100%;margin-bottom:14px;}
+.flbl{font-size:12px;font-weight:800;color:var(--tx2);text-transform:uppercase;
+  letter-spacing:.5px;margin-bottom:6px;display:block;}
+.finp{
+  width:100%;padding:14px 16px;border:2px solid var(--gr2);
+  border-radius:14px;font-family:inherit;font-size:15px;
+  outline:none;transition:border-color .2s;background:white;color:var(--tx);
+}
+.finp:focus{border-color:var(--g);}
+.phone-row{display:flex;gap:8px;}
+.phone-code{
+  width:100px;padding:14px 10px;border:2px solid var(--gr2);
+  border-radius:14px;font-family:inherit;font-size:14px;
+  outline:none;background:white;font-weight:700;color:var(--nv);
+}
+.btn-auth{
+  width:100%;padding:16px;background:var(--g);color:#fff;
+  border:none;border-radius:14px;font-family:inherit;
+  font-size:16px;font-weight:800;cursor:pointer;
+  margin-top:4px;transition:background .2s;letter-spacing:.3px;
+}
+.btn-auth:active{background:#145c2e;}
+.divider{display:flex;align-items:center;gap:12px;width:100%;margin:18px 0;}
+.divider span{font-size:13px;color:var(--tx2);white-space:nowrap;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gr2);}
+.soc-row{display:flex;gap:10px;width:100%;}
+.btn-soc{
+  flex:1;padding:13px;border:2px solid var(--gr2);border-radius:14px;
+  background:white;font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:border-color .2s;
+}
+.btn-soc:hover{border-color:var(--g);}
+.auth-sw{margin-top:20px;font-size:14px;color:var(--tx2);text-align:center;}
+.auth-sw a{color:var(--g);font-weight:800;cursor:pointer;}
+.otp-row{display:flex;gap:12px;justify-content:center;margin:10px 0 6px;}
+.otp-in{
+  width:56px;height:60px;border:2px solid var(--gr2);
+  border-radius:14px;text-align:center;font-size:24px;
+  font-weight:800;font-family:inherit;outline:none;
+  transition:border-color .2s;
+}
+.otp-in:focus{border-color:var(--g);}
+.back-link{
+  background:none;border:none;color:var(--g);
+  font-family:inherit;font-size:14px;font-weight:800;
+  cursor:pointer;margin-bottom:16px;display:flex;align-items:center;gap:5px;
+  align-self:flex-start;
+}
+
+/* ══════════════════════════════════════
+   HOME — CATEGORIES
+══════════════════════════════════════ */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.cat-item{
+  background:var(--wh);border-radius:var(--r);
+  padding:16px 8px;display:flex;flex-direction:column;
+  align-items:center;gap:8px;cursor:pointer;
+  font-size:12px;font-weight:700;text-align:center;
+  box-shadow:var(--sh);border:2px solid transparent;
+  transition:transform .15s;
+}
+.cat-item:active{transform:scale(.95);}
+.cat-item.act{border-color:var(--g);background:var(--gl);}
+.cat-item.all-cat{background:var(--g);color:#fff;}
+.em{font-size:26px;line-height:1;}
+.sec-title{font-size:17px;font-weight:800;margin-bottom:12px;color:var(--nv);}
+.ads-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.ads-cnt{color:var(--g);font-weight:700;font-size:14px;}
+
+/* ══════════════════════════════════════
+   AD CARD
+══════════════════════════════════════ */
+.ad-card{
+  background:var(--wh);border-radius:var(--r);
+  overflow:hidden;margin-bottom:12px;
+  box-shadow:var(--sh);position:relative;
+}
+.ad-badge{
+  position:absolute;top:10px;left:10px;
+  background:var(--or);color:#fff;
+  font-size:11px;font-weight:800;
+  padding:3px 12px;border-radius:20px;z-index:2;
+}
+.ad-img{
+  width:100%;height:140px;
+  background:linear-gradient(135deg,#e8f5ed,#d4edda);
+  display:flex;align-items:center;justify-content:center;
+  font-size:60px;overflow:hidden;
+}
+.ad-img img{width:100%;height:100%;object-fit:cover;}
+.fav-btn{
+  position:absolute;top:10px;right:10px;
+  width:32px;height:32px;background:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  border:none;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.13);
+  font-size:16px;z-index:2;
+}
+.ad-body{padding:12px;}
+.ad-title{font-size:15px;font-weight:800;margin-bottom:4px;}
+.ad-price{color:var(--g);font-size:15px;font-weight:800;margin-bottom:6px;}
+.ad-meta{font-size:12px;color:var(--tx2);display:flex;gap:12px;flex-wrap:wrap;}
+.ad-acts{display:flex;gap:8px;margin-top:10px;}
+
+/* ══════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════ */
+.btn-p{
+  background:var(--g);color:#fff;border:none;border-radius:30px;
+  padding:10px 20px;font-family:inherit;font-size:14px;font-weight:700;
+  cursor:pointer;flex:1;transition:background .2s;
+}
+.btn-p:active{background:#145c2e;}
+.btn-s{
+  background:var(--gl);color:var(--g);border:none;border-radius:30px;
+  padding:10px 16px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;
+}
+.btn-cl{
+  background:var(--gr2);color:var(--tx);border:none;border-radius:30px;
+  padding:10px 20px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;
+}
+
+/* ══════════════════════════════════════
+   ADD FORM
+══════════════════════════════════════ */
+.form-grp{margin-bottom:16px;}
+.form-lbl{font-size:12px;font-weight:800;color:var(--tx2);
+  text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block;}
+.form-in,.form-ta,.form-sel{
+  width:100%;padding:12px 14px;border:2px solid var(--gr2);
+  border-radius:12px;font-family:inherit;font-size:14px;
+  outline:none;transition:border-color .2s;background:#fff;color:var(--tx);
+}
+.form-in:focus,.form-ta:focus{border-color:var(--g);}
+.form-ta{resize:vertical;min-height:80px;}
+.price-grp{display:flex;gap:8px;}
+.price-btn{
+  flex:1;padding:9px;border-radius:10px;border:2px solid var(--gr2);
+  background:#fff;font-family:inherit;font-size:13px;
+  font-weight:700;cursor:pointer;color:var(--tx2);transition:all .2s;
+}
+.price-btn.act{border-color:var(--g);background:var(--gl);color:var(--g);}
+.loc-btn{
+  display:flex;align-items:center;gap:8px;background:var(--gl);color:var(--g);
+  border:2px dashed var(--g);border-radius:12px;padding:12px 14px;
+  cursor:pointer;width:100%;font-family:inherit;font-size:14px;font-weight:700;
+}
+.tez-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff8e6;border-radius:12px;padding:14px;
+  border:2px solid #ffd97a;margin-bottom:16px;
+}
+/* toggle */
+.tog{
+  width:48px;height:26px;background:var(--gr2);border-radius:13px;
+  position:relative;cursor:pointer;transition:background .3s;border:none;flex-shrink:0;
+}
+.tog.on{background:var(--or);}
+.tog::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:20px;height:20px;background:#fff;border-radius:50%;
+  transition:left .3s;box-shadow:0 1px 4px rgba(0,0,0,.2);
+}
+.tog.on::after{left:25px;}
+
+/* ══════════════════════════════════════
+   PHOTO UPLOAD
+══════════════════════════════════════ */
+.photo-row{display:flex;gap:8px;flex-wrap:wrap;}
+.photo-th{width:72px;height:72px;border-radius:12px;overflow:hidden;position:relative;}
+.photo-th img{width:100%;height:100%;object-fit:cover;}
+.photo-del{
+  position:absolute;top:2px;right:2px;width:20px;height:20px;
+  background:rgba(0,0,0,.65);color:#fff;border:none;border-radius:50%;
+  font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.photo-add{
+  width:72px;height:72px;border:2px dashed var(--gr2);border-radius:12px;
+  background:var(--gr);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;cursor:pointer;font-size:11px;color:var(--tx2);
+  gap:4px;font-family:inherit;font-weight:700;transition:border-color .2s;
+}
+.photo-add:hover{border-color:var(--g);color:var(--g);}
+
+/* ══════════════════════════════════════
+   PROFILE
+══════════════════════════════════════ */
+.prof-head{
+  background:linear-gradient(135deg,var(--g),var(--gm));
+  padding:30px 20px 24px;text-align:center;color:#fff;
+}
+.av-wrap{
+  position:relative;width:88px;height:88px;
+  margin:0 auto 12px;cursor:pointer;
+}
+.av{
+  width:88px;height:88px;border-radius:50%;
+  background:rgba(255,255,255,.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:34px;font-weight:900;
+  border:3px solid rgba(255,255,255,.7);
+  overflow:hidden;
+}
+.av img{width:100%;height:100%;object-fit:cover;}
+.av-cam{
+  position:absolute;bottom:2px;right:2px;
+  width:28px;height:28px;background:var(--or);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;border:2.5px solid #fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+.prof-name{font-size:20px;font-weight:800;}
+.prof-sub{font-size:13px;opacity:.85;margin-top:2px;}
+.prof-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.2);border-radius:20px;
+  padding:5px 14px;font-size:12px;font-weight:700;margin-top:8px;
+}
+.btn-edit-prof{
+  margin-top:12px;background:rgba(255,255,255,.18);color:#fff;
+  border:1.5px solid rgba(255,255,255,.5);border-radius:20px;
+  padding:7px 20px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+}
+.prof-list{padding:14px;}
+.p-item{
+  background:#fff;border-radius:14px;padding:16px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;box-shadow:var(--sh);cursor:pointer;
+  border:none;width:100%;font-family:inherit;text-align:left;
+}
+.p-left{display:flex;align-items:center;gap:12px;}
+.p-ico{width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;}
+.p-badge{background:var(--gl);color:var(--g);font-size:12px;font-weight:800;padding:3px 10px;border-radius:20px;}
+
+/* ACCORDION BOX */
+.acc-box{background:#fff;border-radius:14px;margin-bottom:10px;box-shadow:var(--sh);overflow:hidden;}
+.acc-head{
+  padding:14px 16px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;border:none;background:none;width:100%;font-family:inherit;text-align:left;
+}
+.acc-head-l{display:flex;align-items:center;gap:12px;}
+.acc-ico{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.acc-title{font-size:15px;font-weight:700;color:var(--nv);}
+.chev{font-size:13px;color:var(--tx2);transition:transform .3s;display:inline-block;}
+.chev.open{transform:rotate(180deg);}
+.acc-body{display:none;padding:0 14px 14px;border-top:1px solid var(--gr);}
+.acc-body.open{display:block;}
+
+/* SETTINGS */
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--gr);}
+.s-row:last-child{border-bottom:none;}
+.s-row-l{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;}
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 0;}
+.lang-btn{
+  display:flex;align-items:center;gap:8px;padding:12px;border-radius:12px;
+  border:2px solid var(--gr2);background:#fff;font-family:inherit;
+  font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;
+}
+.lang-btn.act{border-color:var(--g);background:var(--gl);color:var(--g);}
+
+/* SUPPORT */
+.sup-link{
+  display:flex;align-items:center;gap:14px;padding:13px 0;
+  border-bottom:1px solid var(--gr);
+  text-decoration:none;cursor:pointer;
+  border-left:none;border-right:none;border-top:none;
+  background:none;width:100%;font-family:inherit;text-align:left;
+}
+.sup-link:last-child{border-bottom:none;padding-bottom:0;}
+.sup-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.sup-info{flex:1;}
+.sup-name{font-size:14px;font-weight:800;color:var(--nv);}
+.sup-num{font-size:13px;color:var(--tx2);margin-top:2px;}
+
+/* LOGOUT */
+.logout-btn{
+  display:flex;align-items:center;gap:10px;background:#fff0f0;color:#e74c3c;
+  border:none;border-radius:14px;padding:16px;font-family:inherit;
+  font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-top:6px;
+}
+
+/* EMPTY STATE */
+.empty{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:300px;gap:12px;
+  color:var(--tx2);text-align:center;
+}
+
+/* ══════════════════════════════════════
+   MODAL
+══════════════════════════════════════ */
+.mo{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.55);z-index:500;align-items:flex-end;
+}
+.mo.open{display:flex;}
+.md{
+  background:#fff;border-radius:24px 24px 0 0;padding:24px;
+  width:100%;max-width:480px;margin:0 auto;
+  animation:up .3s ease;max-height:92vh;overflow-y:auto;
+}
+.md::-webkit-scrollbar{display:none;}
+@keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.md h3{font-size:18px;font-weight:800;margin-bottom:6px;}
+.md p{font-size:14px;color:var(--tx2);margin-bottom:14px;line-height:1.5;}
+.card-ui{
+  background:linear-gradient(135deg,var(--nv),#2c4a6e);
+  border-radius:16px;padding:20px;color:#fff;margin-bottom:16px;
+}
+.card-num{font-size:20px;font-weight:800;letter-spacing:3px;}
+.amount-box{
+  background:var(--gl);border-radius:12px;padding:14px;
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:14px;
+}
+.amount{font-size:22px;font-weight:900;color:var(--g);}
+.reveal-box{background:linear-gradient(135deg,var(--gl),#d4edda);border-radius:14px;padding:16px;margin-top:12px;}
+.rv{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid rgba(26,122,60,.1);}
+.rv:last-child{border-bottom:none;}
+.rv-lbl{font-size:12px;color:var(--tx2);}
+.rv-val{font-size:15px;font-weight:800;color:var(--nv);}
+.map-ph{
+  background:linear-gradient(135deg,#e8f4fd,#d6eaf8);border-radius:16px;
+  height:170px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:8px;color:var(--g);font-weight:700;
+  font-size:15px;border:2px solid var(--gl);cursor:pointer;margin-top:12px;
+}
+.loc-show{
+  background:var(--gl);border-radius:12px;padding:12px;
+  display:flex;align-items:center;gap:10px;
+  font-size:14px;font-weight:700;color:var(--g);margin-top:10px;
+}
+.info-note{font-size:13px;padding:10px;border-radius:10px;margin-bottom:14px;}
+.note-warn{background:#fff8e6;color:#b7770d;}
+.note-ok{background:var(--gl);color:var(--g);}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     SPLASH
+════════════════════════════════════ -->
+<div class="screen active" id="screen-splash">
+  <svg width="170" height="72" viewBox="0 0 170 72" fill="none">
+    <text x="2" y="24" font-family="Nunito,sans-serif" font-weight="900" font-size="22" fill="#2ca05a">yor</text>
+    <text x="2" y="64" font-family="Nunito,sans-serif" font-weight="900" font-size="54" fill="#1a2e4a">D</text>
+    <text x="40" y="64" font-family="Nunito,sans-serif" font-weight="900" font-size="54" fill="#e67e22">ast</text>
+    <line x1="2" y1="68" x2="128" y2="68" stroke="#e67e22" stroke-width="4" stroke-linecap="round"/>
+  </svg>
+  <span class="splash-tagline">Поиск работы</span>
+</div>
+
+<!-- ════════════════════════════════════
+     LOGIN
+════════════════════════════════════ -->
+<div class="screen" id="screen-login">
+  <div class="auth-wrap">
+    <svg width="130" height="56" viewBox="0 0 170 72" fill="none" style="margin-bottom:20px">
+      <text x="2" y="24" font-family="Nunito,sans-serif" font-weight="900" font-size="22" fill="#2ca05a">yor</text>
+      <text x="2" y="64" font-family="Nunito,sans-serif" font-weight="900" font-size="54" fill="#1a2e4a">D</text>
+      <text x="40" y="64" font-family="Nunito,sans-serif" font-weight="900" font-size="54" fill="#e67e22">ast</text>
+      <line x1="2" y1="68" x2="128" y2="68" stroke="#e67e22" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <div class="auth-title" data-k="login_title">Kirish</div>
+    <div class="auth-sub" data-k="login_sub">Telefon raqam yoki ijtimoiy tarmoq orqali kiring</div>
+    <div class="auth-err" id="login-err">Xato!</div>
+    <div class="fld">
+      <label class="flbl" data-k="lbl_phone">Telefon raqam</label>
+      <div class="phone-row">
+        <select class="phone-code" id="login-code">
+          <option value="+992">🇹🇯 +992</option>
+          <option value="+998">🇺🇿 +998</option>
+          <option value="+7">🇷🇺 +7</option>
+          <option value="+44">🇬🇧 +44</option>
+        </select>
+        <input class="finp" id="login-phone" type="tel" placeholder="93 123 45 67" inputmode="numeric">
+      </div>
+    </div>
+    <div class="fld">
+      <label class="flbl" data-k="lbl_pass">Parol</label>
+      <input class="finp" id="login-pass" type="password" placeholder="••••••••">
+    </div>
+    <button class="btn-auth" onclick="doLogin()" data-k="btn_login">Kirish →</button>
+    <div class="divider"><span data-k="or">yoki</span></div>
+    <div class="soc-row">
+      <button class="btn-soc" onclick="socialLogin('Google')">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.3 30.2 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.8 6c1.8-5.4 6.8-9.8 13.5-9.8z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.5 2.8-2.2 5.2-4.7 6.8l7.3 5.7c4.3-4 6.7-9.8 7.2-16.5z"/><path fill="#FBBC05" d="M10.5 28.7c-.3-1-.5-2.1-.5-3.2s.2-2.2.5-3.2l-7.8-6A23.9 23.9 0 0 0 0 25c0 3.9.9 7.5 2.7 10.7l7.8-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.3-5.7c-2 1.4-4.7 2.2-7.9 2.2-6.6 0-12.2-4.4-14.2-10.3l-7.8 6C6.6 42.6 14.6 48 24 48z"/></svg>
+        Google
+      </button>
+      <button class="btn-soc" onclick="socialLogin('Telegram')">
+        <svg width="20" height="20" viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#2CA5E0"/><path fill="white" d="M10 23.5l6.7 2.5 2.6 8.2 3.3-4.2 6.8 5 6.6-19-26 7.5zm9.3 3.8l9.8-6.1-7.2 7.2-.1 4.4-2.5-5.5z"/></svg>
+        Telegram
+      </button>
+    </div>
+    <div class="auth-sw"><span data-k="no_acc">Akkount yo'qmi?</span> <a onclick="go('screen-register')" data-k="reg_link">Ro'yxatdan o'ting</a></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     REGISTER
+════════════════════════════════════ -->
+<div class="screen" id="screen-register">
+  <div class="auth-wrap">
+    <svg width="130" height="56" viewBox="0 0 170 72" fill="none" style="margin-bottom:20px">
+      <text x="2" y="24" font-family="Nunito,sans-serif" font-weight="900" font-size="22" fill="#2ca05a">yor</text>
+      <text x="2" y="64" font-family="Nunito,sans-serif" font-weight="900" font-size="54" fill="#1a2e4a">D</text>
+      <text x="40" y="64" font-family="Nunito,sans-serif" font-weight="900" font-size="54" fill="#e67e22">ast</text>
+      <line x1="2" y1="68" x2="128" y2="68" stroke="#e67e22" stroke-width="4" stroke-linecap="round"/>
+    </svg>
+    <div class="auth-title" data-k="reg_title">Ro'yxatdan o'tish</div>
+    <div class="auth-sub" data-k="reg_sub">Yangi akkount yarating</div>
+    <div class="auth-err" id="reg-err"></div>
+    <div class="fld">
+      <label class="flbl" data-k="lbl_name">Ism Familiya</label>
+      <input class="finp" id="reg-name" type="text" placeholder="Tursunmurod Muminov">
+    </div>
+    <div class="fld">
+      <label class="flbl" data-k="lbl_phone">Telefon raqam</label>
+      <div class="phone-row">
+        <select class="phone-code" id="reg-code">
+          <option value="+992">🇹🇯 +992</option>
+          <option value="+998">🇺🇿 +998</option>
+          <option value="+7">🇷🇺 +7</option>
+          <option value="+44">🇬🇧 +44</option>
+        </select>
+        <input class="finp" id="reg-phone" type="tel" placeholder="93 123 45 67" inputmode="numeric">
+      </div>
+    </div>
+    <div class="fld">
+      <label class="flbl" data-k="lbl_pass">Parol</label>
+      <input class="finp" id="reg-pass" type="password" placeholder="Kamida 6 belgi">
+    </div>
+    <div class="fld">
+      <label class="flbl" data-k="lbl_pass2">Parolni tasdiqlang</label>
+      <input class="finp" id="reg-pass2" type="password" placeholder="Parolni qayta kiriting">
+    </div>
+    <button class="btn-auth" onclick="doRegister()" data-k="btn_reg">Ro'yxatdan o'tish →</button>
+    <div class="divider"><span data-k="or">yoki</span></div>
+    <div class="soc-row">
+      <button class="btn-soc" onclick="socialLogin('Google')">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.7 2.3 30.2 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.8 6c1.8-5.4 6.8-9.8 13.5-9.8z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.5 2.8-2.2 5.2-4.7 6.8l7.3 5.7c4.3-4 6.7-9.8 7.2-16.5z"/><path fill="#FBBC05" d="M10.5 28.7c-.3-1-.5-2.1-.5-3.2s.2-2.2.5-3.2l-7.8-6A23.9 23.9 0 0 0 0 25c0 3.9.9 7.5 2.7 10.7l7.8-6z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.3-5.7c-2 1.4-4.7 2.2-7.9 2.2-6.6 0-12.2-4.4-14.2-10.3l-7.8 6C6.6 42.6 14.6 48 24 48z"/></svg>
+        Google
+      </button>
+      <button class="btn-soc" onclick="socialLogin('Telegram')">
+        <svg width="20" height="20" viewBox="0 0 48 48"><circle cx="24" cy="24" r="24" fill="#2CA5E0"/><path fill="white" d="M10 23.5l6.7 2.5 2.6 8.2 3.3-4.2 6.8 5 6.6-19-26 7.5zm9.3 3.8l9.8-6.1-7.2 7.2-.1 4.4-2.5-5.5z"/></svg>
+        Telegram
+      </button>
+    </div>
+    <div class="auth-sw"><span data-k="have_acc">Akkount bormi?</span> <a onclick="go('screen-login')" data-k="login_link">Kiring</a></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     OTP
+════════════════════════════════════ -->
+<div class="screen" id="screen-otp">
+  <div class="auth-wrap">
+    <button class="back-link" onclick="go('screen-register')">← <span data-k="back">Orqaga</span></button>
+    <div class="auth-title" data-k="otp_title">SMS tasdiqlash</div>
+    <div class="auth-sub" id="otp-hint" style="margin-bottom:20px">Raqamingizga SMS yuborildi</div>
+    <div class="otp-row">
+      <input class="otp-in" id="o0" maxlength="1" inputmode="numeric" oninput="oNext(this,0)">
+      <input class="otp-in" id="o1" maxlength="1" inputmode="numeric" oninput="oNext(this,1)">
+      <input class="otp-in" id="o2" maxlength="1" inputmode="numeric" oninput="oNext(this,2)">
+      <input class="otp-in" id="o3" maxlength="1" inputmode="numeric" oninput="oNext(this,3)">
+    </div>
+    <p style="font-size:13px;color:var(--tx2);text-align:center;margin-bottom:16px" data-k="otp_hint2">SMS kodni kiriting</p>
+    <button class="btn-auth" onclick="verifyOTP()" data-k="btn_verify">Tasdiqlash →</button>
+    <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--tx2)">
+      <span data-k="no_sms">SMS kelmadimi?</span> <a onclick="resendOTP()" style="color:var(--g);font-weight:800;cursor:pointer" data-k="resend">Qayta yuborish</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     HOME
+════════════════════════════════════ -->
+<div class="screen" id="screen-home">
+  <div class="topbar">
+    <svg class="logo-svg" viewBox="0 0 120 44" fill="none"><text x="0" y="14" font-family="Nunito,sans-serif" font-weight="900" font-size="14" fill="#2ca05a">yor</text><text x="0" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#1a2e4a">D</text><text x="20" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#e67e22">ast</text><line x1="0" y1="40" x2="68" y2="40" stroke="#e67e22" stroke-width="3" stroke-linecap="round"/></svg>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1a7a3c" stroke-width="2.5" width="18" height="18"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search-in" placeholder="Ish qidiring...">
+    </div>
+  </div>
+  <div class="content">
+    <div class="cat-grid">
+      <div class="cat-item act" onclick="selCat(this,'home')"><span class="em">✨</span><span data-k="c_home">Uy ishlari</span></div>
+      <div class="cat-item" onclick="selCat(this,'field')"><span class="em">🌾</span><span data-k="c_field">Dala ishlari</span></div>
+      <div class="cat-item" onclick="selCat(this,'build')"><span class="em">🔨</span><span data-k="c_build">Qurilish</span></div>
+      <div class="cat-item" onclick="selCat(this,'help')"><span class="em">🤝</span><span data-k="c_help">Yordamchi</span></div>
+      <div class="cat-item" onclick="selCat(this,'daily')"><span class="em">⏱️</span><span data-k="c_daily">Kunlik ish</span></div>
+      <div class="cat-item" onclick="selCat(this,'master')"><span class="em">🔧</span><span data-k="c_master">Usta</span></div>
+      <div class="cat-item" onclick="selCat(this,'courier')"><span class="em">🚗</span><span data-k="c_courier">Kuryer</span></div>
+      <div class="cat-item" onclick="selCat(this,'other')"><span class="em">···</span><span data-k="c_other">Boshqalar</span></div>
+      <div class="cat-item all-cat" onclick="selCat(this,'all')"><span style="font-size:26px">⊞</span><span data-k="c_all">Barchasi</span></div>
+    </div>
+    <div class="ads-hdr">
+      <div class="sec-title" data-k="new_ads">Yangi e'lonlar</div>
+      <div class="ads-cnt">2 ta</div>
+    </div>
+    <div id="ads-list">
+      <!-- E'lonlar JS tomonidan renderAdsList() orqali ko'rsatiladi -->
+    </div>
+  </div>
+  <nav class="bot-nav">
+    <button class="ni active" onclick="go('screen-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span data-k="nav_home">Bosh sahifa</span></button>
+    <button class="ni" onclick="go('screen-fav')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span data-k="nav_fav">Tanlangan</span></button>
+    <button class="ni-add" onclick="go('screen-add')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="ni" onclick="go('screen-msg')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span data-k="nav_msg">Xabarlar</span></button>
+    <button class="ni" onclick="go('screen-profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span data-k="nav_prof">Profil</span></button>
+  </nav>
+</div>
+
+<!-- ════════════════════════════════════
+     FAVORITES
+════════════════════════════════════ -->
+<div class="screen" id="screen-fav">
+  <div class="topbar">
+    <svg class="logo-svg" viewBox="0 0 120 44" fill="none"><text x="0" y="14" font-family="Nunito,sans-serif" font-weight="900" font-size="14" fill="#2ca05a">yor</text><text x="0" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#1a2e4a">D</text><text x="20" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#e67e22">ast</text><line x1="0" y1="40" x2="68" y2="40" stroke="#e67e22" stroke-width="3" stroke-linecap="round"/></svg>
+    <span style="font-size:16px;font-weight:800;color:var(--nv);flex:1;text-align:center" data-k="nav_fav">Tanlangan</span>
+  </div>
+  <div class="content"><div class="empty"><div style="font-size:60px">🤍</div><div style="font-size:16px;font-weight:800;color:var(--nv)" data-k="fav_empty">Tanlangan e'lon yo'q</div><div data-k="fav_hint">♥ bosib e'lonlarni saqlang</div></div></div>
+  <nav class="bot-nav">
+    <button class="ni" onclick="go('screen-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span data-k="nav_home">Bosh sahifa</span></button>
+    <button class="ni active" onclick="go('screen-fav')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span data-k="nav_fav">Tanlangan</span></button>
+    <button class="ni-add" onclick="go('screen-add')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="ni" onclick="go('screen-msg')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span data-k="nav_msg">Xabarlar</span></button>
+    <button class="ni" onclick="go('screen-profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span data-k="nav_prof">Profil</span></button>
+  </nav>
+</div>
+
+<!-- ════════════════════════════════════
+     ADD AD
+════════════════════════════════════ -->
+<div class="screen" id="screen-add">
+  <div class="topbar">
+    <svg class="logo-svg" viewBox="0 0 120 44" fill="none"><text x="0" y="14" font-family="Nunito,sans-serif" font-weight="900" font-size="14" fill="#2ca05a">yor</text><text x="0" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#1a2e4a">D</text><text x="20" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#e67e22">ast</text><line x1="0" y1="40" x2="68" y2="40" stroke="#e67e22" stroke-width="3" stroke-linecap="round"/></svg>
+    <span style="font-size:16px;font-weight:800;color:var(--nv);flex:1;text-align:center" data-k="add_title">E'lon qo'shish</span>
+  </div>
+  <div class="content">
+    <div class="form-grp"><label class="form-lbl" data-k="lbl_title">Sarlavha *</label><input class="form-in" id="ad-title" placeholder="Masalan: Kvartira tozalash..."></div>
+    <div class="form-grp"><label class="form-lbl" data-k="lbl_desc">Tavsif *</label><textarea class="form-ta" id="ad-desc" placeholder="Xizmatingizni batafsil yozing..."></textarea></div>
+    <div class="form-grp">
+      <label class="form-lbl" data-k="lbl_price_type">Narx turi</label>
+      <div class="price-grp">
+        <button class="price-btn act" onclick="selPrice(this)" data-k="p_fixed">Belgilangan</button>
+        <button class="price-btn" onclick="selPrice(this)" data-k="p_nego">Kelishamiz</button>
+        <button class="price-btn" onclick="selPrice(this)" data-k="p_free">Bepul</button>
+      </div>
+    </div>
+    <div class="form-grp"><label class="form-lbl" data-k="lbl_price">Narx (Somoniy)</label><input class="form-in" id="ad-price" type="number" inputmode="numeric" placeholder="0"></div>
+    <div class="form-grp">
+      <label class="form-lbl" data-k="lbl_cat">Kategoriya *</label>
+      <select class="form-sel" id="ad-cat">
+        <option value="">Tanlang...</option>
+        <option value="home" data-k="c_home">Uy ishlari</option>
+        <option value="field" data-k="c_field">Dala ishlari</option>
+        <option value="build" data-k="c_build">Qurilish</option>
+        <option value="help" data-k="c_help">Yordamchi</option>
+        <option value="daily" data-k="c_daily">Kunlik ish</option>
+        <option value="master" data-k="c_master">Usta</option>
+        <option value="courier" data-k="c_courier">Kuryer</option>
+        <option value="other" data-k="c_other">Boshqalar</option>
+      </select>
+    </div>
+    <div class="form-grp"><label class="form-lbl" data-k="lbl_city">Shahar</label><input class="form-in" id="ad-city" value="Dushanbe"></div>
+    <div class="form-grp">
+      <label class="form-lbl">📍 <span data-k="lbl_loc">Lokatsiya</span></label>
+      <button class="loc-btn" onclick="openM('m-loc')">📍 <span data-k="loc_btn">Xaritadan joyni belgilash</span></button>
+      <div class="loc-show" id="ad-loc-show" style="display:none">📍 <span id="ad-loc-text">Dushanbe</span></div>
+    </div>
+    <div class="form-grp">
+      <label class="form-lbl" data-k="lbl_photos">Rasmlar (5 tagacha)</label>
+      <div class="photo-row" id="photo-row">
+        <button class="photo-add" id="photo-add-btn" onclick="document.getElementById('ph-file').click()">📷<br><span data-k="photo_add">Qo'shish</span></button>
+      </div>
+      <input type="file" id="ph-file" accept="image/*" multiple style="display:none" onchange="addPhotos(this)">
+    </div>
+    <div class="tez-row">
+      <div><div style="font-size:14px;font-weight:800">⚡ <span data-k="tezkor">Tezkor</span></div><div style="font-size:12px;color:var(--tx2)" data-k="tez_sub">E'lon yuqorida ko'rinadi — 10 SM</div></div>
+      <button class="tog" id="tez-tog" onclick="togTez()"></button>
+    </div>
+    <button class="btn-p" style="width:100%;padding:16px;font-size:16px;border-radius:16px" onclick="submitAd()" data-k="submit_ad">✓ E'lonni joylashtirish</button>
+  </div>
+  <nav class="bot-nav">
+    <button class="ni" onclick="go('screen-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span data-k="nav_home">Bosh sahifa</span></button>
+    <button class="ni" onclick="go('screen-fav')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span data-k="nav_fav">Tanlangan</span></button>
+    <button class="ni-add" style="background:linear-gradient(135deg,#145c2e,var(--g))"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="ni" onclick="go('screen-msg')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span data-k="nav_msg">Xabarlar</span></button>
+    <button class="ni" onclick="go('screen-profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span data-k="nav_prof">Profil</span></button>
+  </nav>
+</div>
+
+<!-- ════════════════════════════════════
+     MESSAGES
+════════════════════════════════════ -->
+<div class="screen" id="screen-msg">
+  <div class="topbar">
+    <svg class="logo-svg" viewBox="0 0 120 44" fill="none"><text x="0" y="14" font-family="Nunito,sans-serif" font-weight="900" font-size="14" fill="#2ca05a">yor</text><text x="0" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#1a2e4a">D</text><text x="20" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#e67e22">ast</text><line x1="0" y1="40" x2="68" y2="40" stroke="#e67e22" stroke-width="3" stroke-linecap="round"/></svg>
+    <span style="font-size:16px;font-weight:800;color:var(--nv);flex:1;text-align:center" data-k="nav_msg">Xabarlar</span>
+  </div>
+  <div class="content"><div class="empty"><div style="font-size:60px">💬</div><div style="font-size:16px;font-weight:800;color:var(--nv)" data-k="msg_empty">Xabarlar yo'q</div></div></div>
+  <nav class="bot-nav">
+    <button class="ni" onclick="go('screen-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span data-k="nav_home">Bosh sahifa</span></button>
+    <button class="ni" onclick="go('screen-fav')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span data-k="nav_fav">Tanlangan</span></button>
+    <button class="ni-add" onclick="go('screen-add')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="ni active" onclick="go('screen-msg')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span data-k="nav_msg">Xabarlar</span></button>
+    <button class="ni" onclick="go('screen-profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span data-k="nav_prof">Profil</span></button>
+  </nav>
+</div>
+
+<!-- ════════════════════════════════════
+     PROFILE
+════════════════════════════════════ -->
+<div class="screen" id="screen-profile">
+  <div class="topbar">
+    <svg class="logo-svg" viewBox="0 0 120 44" fill="none"><text x="0" y="14" font-family="Nunito,sans-serif" font-weight="900" font-size="14" fill="#2ca05a">yor</text><text x="0" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#1a2e4a">D</text><text x="20" y="36" font-family="Nunito,sans-serif" font-weight="900" font-size="28" fill="#e67e22">ast</text><line x1="0" y1="40" x2="68" y2="40" stroke="#e67e22" stroke-width="3" stroke-linecap="round"/></svg>
+    <span style="font-size:16px;font-weight:800;color:var(--nv);flex:1;text-align:center" data-k="nav_prof">Profil</span>
+  </div>
+  <div class="content" style="padding:0 0 84px">
+    <div class="prof-head">
+      <div class="av-wrap" onclick="document.getElementById('av-file').click()">
+        <div class="av" id="av-el"><span id="av-letter">Т</span></div>
+        <div class="av-cam">📷</div>
+      </div>
+      <input type="file" id="av-file" accept="image/*" style="display:none" onchange="setAvatar(this)">
+      <div class="prof-name" id="prof-name">Tursunmurod</div>
+      <div class="prof-sub" id="prof-phone">+992 93 123 45 67</div>
+      <div id="prof-loc" style="font-size:12px;opacity:.85;margin-top:3px;display:none">📍 <span id="prof-loc-txt"></span></div>
+      <div class="prof-badge">⭐ <span data-k="member">Dastyor a'zosi</span></div>
+      <button class="btn-edit-prof" onclick="openEditProf()" data-k="edit_prof">✏️ Profilni tahrirlash</button>
+    </div>
+    <div class="prof-list">
+      <button class="p-item"><div class="p-left"><div class="p-ico" style="background:#e8f5ed">📋</div><span style="font-weight:700" data-k="my_ads">Mening e'lonlarim</span></div><span class="p-badge">0</span></button>
+      <button class="p-item"><div class="p-left"><div class="p-ico" style="background:#fff0f5">❤️</div><span style="font-weight:700" data-k="nav_fav">Tanlangan</span></div><span class="p-badge">0</span></button>
+
+      <!-- SETTINGS -->
+      <div class="acc-box">
+        <button class="acc-head" onclick="togAcc('set')">
+          <div class="acc-head-l"><div class="acc-ico" style="background:var(--gl)">⚙️</div><span class="acc-title" data-k="settings">Sozlamalar</span></div>
+          <span class="chev" id="chev-set">▼</span>
+        </button>
+        <div class="acc-body" id="body-set">
+          <div style="font-size:11px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1px;padding:12px 0 6px" data-k="lang_lbl">🌐 Til tanlash</div>
+          <div class="lang-grid">
+            <button class="lang-btn" onclick="setLang('uz')">🇺🇿 O'zbek</button>
+            <button class="lang-btn" onclick="setLang('tg')">🇹🇯 Тоҷикӣ</button>
+            <button class="lang-btn" onclick="setLang('ru')">🇷🇺 Русский</button>
+            <button class="lang-btn" onclick="setLang('en')">🇬🇧 English</button>
+          </div>
+          <div class="s-row"><div class="s-row-l">🔔 <span data-k="notif">Bildirishnomalar</span></div><button class="tog on" onclick="this.classList.toggle('on')"></button></div>
+          <div class="s-row"><div class="s-row-l">🌙 <span data-k="dark_mode">Tungi rejim</span></div><button class="tog" onclick="this.classList.toggle('on')"></button></div>
+          <div style="background:#f0f9f4;border-radius:12px;padding:12px;margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+            <div><div style="font-weight:800;font-size:14px;color:var(--nv)">DyorDast</div><div style="font-size:12px;color:var(--g)">Dastyor.com</div><div style="font-size:11px;color:var(--tx2)">Tojikiston · O'zbekiston</div></div>
+            <span style="font-size:12px;font-weight:700;color:var(--g)">v1.0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUPPORT -->
+      <div class="acc-box">
+        <button class="acc-head" onclick="togAcc('sup')">
+          <div class="acc-head-l"><div class="acc-ico" style="background:#e8f0ff">🛟</div><span class="acc-title" data-k="support">Texnik qo'llab-quvvatlash</span></div>
+          <span class="chev" id="chev-sup">▼</span>
+        </button>
+        <div class="acc-body" id="body-sup">
+          <p style="font-size:13px;color:var(--tx2);padding:10px 0 4px" data-k="support_sub">Savol yoki muammo bo'lsa, biz bilan bog'laning:</p>
+          <!-- WhatsApp -->
+          <button class="sup-link" onclick="window.open('https://wa.me/992928487070','_blank')">
+            <div class="sup-ico" style="background:#e8fef0">
+              <svg width="26" height="26" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#25D366"/><path d="M22.5 9.5A9 9 0 0 0 7.2 20.3L6 26l5.9-1.5A9 9 0 0 0 22.5 9.5zm-6.5 14a7.5 7.5 0 0 1-4.1-1.2l-.3-.2-3.1.8.8-3-.2-.3a7.5 7.5 0 1 1 6.9 3.9zm4.1-5.5c-.2-.1-1.3-.6-1.5-.7-.2-.1-.3-.1-.5.1-.1.2-.5.7-.6.8-.1.1-.2.2-.4 0-.2-.1-.9-.3-1.7-1.1-.6-.5-1-1.2-1.1-1.4-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.3l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 2s.8 2.3.9 2.5c.1.2 1.6 2.5 4 3.4.6.2 1 .3 1.4.4.6.1 1.1.1 1.5.1.5-.1 1.5-.6 1.7-1.2.2-.5.2-1 .1-1.1-.1-.1-.3-.2-.5-.3z" fill="white"/></svg>
+            </div>
+            <div class="sup-info"><div class="sup-name">WhatsApp</div><div class="sup-num">+992 92 848 70 70</div></div>
+            <span style="color:var(--tx2);font-size:18px">›</span>
+          </button>
+          <!-- Telegram -->
+          <button class="sup-link" onclick="window.open('https://t.me/+992928487070','_blank')">
+            <div class="sup-ico" style="background:#e8f6ff">
+              <svg width="26" height="26" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#2CA5E0"/><path d="M8 15.5l2.8 1 1.1 3.4 1.4-1.8 2.9 2.1 2.8-8-11 3.3zm3.8 1.9l6.2-3.8-4.5 4.5-.2 2.8-1.5-3.5z" fill="white"/></svg>
+            </div>
+            <div class="sup-info"><div class="sup-name">Telegram</div><div class="sup-num">+992 92 848 70 70</div></div>
+            <span style="color:var(--tx2);font-size:18px">›</span>
+          </button>
+          <!-- Instagram -->
+          <button class="sup-link" onclick="window.open('https://instagram.com/dyordast','_blank')">
+            <div class="sup-ico" style="background:#fff0f5">
+              <svg width="26" height="26" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="url(#ig_g)"/><defs><linearGradient id="ig_g" x1="0" y1="32" x2="32" y2="0"><stop stop-color="#F58529"/><stop offset=".5" stop-color="#DD2A7B"/><stop offset="1" stop-color="#515BD4"/></linearGradient></defs><rect x="8" y="8" width="16" height="16" rx="5" stroke="white" stroke-width="2"/><circle cx="16" cy="16" r="4" stroke="white" stroke-width="2"/><circle cx="21.5" cy="10.5" r="1.2" fill="white"/></svg>
+            </div>
+            <div class="sup-info"><div class="sup-name">Instagram</div><div class="sup-num">@dyordast</div></div>
+            <span style="color:var(--tx2);font-size:18px">›</span>
+          </button>
+        </div>
+      </div>
+
+      <button class="logout-btn" onclick="doLogout()">🚪 <span data-k="logout">Chiqish</span></button>
+    </div>
+  </div>
+  <nav class="bot-nav">
+    <button class="ni" onclick="go('screen-home')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span data-k="nav_home">Bosh sahifa</span></button>
+    <button class="ni" onclick="go('screen-fav')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span data-k="nav_fav">Tanlangan</span></button>
+    <button class="ni-add" onclick="go('screen-add')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="ni" onclick="go('screen-msg')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span data-k="nav_msg">Xabarlar</span></button>
+    <button class="ni active" onclick="go('screen-profile')"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span data-k="nav_prof">Profil</span></button>
+  </nav>
+</div>
+
+<!-- ════════════════════════════════════
+     MODALS
+════════════════════════════════════ -->
+
+<!-- TEZKOR PAYMENT -->
+<div class="mo" id="m-tez">
+  <div class="md">
+    <h3>⚡ <span data-k="tezkor">Tezkor e'lon</span></h3>
+    <p data-k="tez_modal_sub">E'loningiz barcha e'lonlardan yuqorida ko'rinadi</p>
+    <div class="card-ui">
+      <div style="font-size:11px;opacity:.7;margin-bottom:6px">KARTA RAQAMI</div>
+      <div class="card-num">8600 1234 5678 9012</div>
+      <div style="font-size:12px;opacity:.8;margin-top:8px">TURSUNMUROD T.</div>
+    </div>
+    <div class="amount-box"><div><div style="font-size:13px;color:var(--tx2)" data-k="pay_amt">To'lov miqdori</div><div class="amount">10 SM</div></div><div style="font-size:30px">⚡</div></div>
+    <p class="info-note note-warn" data-k="tez_note">To'lovdan so'ng e'lon birinchi qatorga ko'tariladi</p>
+    <div style="display:flex;gap:10px"><button class="btn-cl" onclick="closeM('m-tez')" data-k="cancel">Bekor</button><button class="btn-p" onclick="confirmTez()" data-k="paid">✓ To'ladim</button></div>
+  </div>
+</div>
+
+<!-- TAKE JOB PAYMENT -->
+<div class="mo" id="m-job">
+  <div class="md">
+    <h3 id="job-title">🤝 Ishni olish</h3>
+    <p><span data-k="job_info">Ish beruvchi ma'lumotlarini ko'rish uchun</span> <strong>10%</strong> <span data-k="job_info2">xizmat haqi to'lashingiz kerak</span></p>
+    <div class="card-ui">
+      <div style="font-size:11px;opacity:.7;margin-bottom:6px">KARTA RAQAMI</div>
+      <div class="card-num">8600 1234 5678 9012</div>
+      <div style="font-size:12px;opacity:.8;margin-top:8px">TURSUNMUROD T.</div>
+    </div>
+    <div class="amount-box"><div><div style="font-size:13px;color:var(--tx2)">10%</div><div class="amount" id="job-fee">8 SM</div></div><div style="font-size:24px">🤝</div></div>
+    <p class="info-note note-ok" data-k="job_after">To'lovdan so'ng telefon, manzil va lokatsiya ochiladi</p>
+    <div style="display:flex;gap:10px"><button class="btn-cl" onclick="closeM('m-job')" data-k="back">Orqaga</button><button class="btn-p" onclick="confirmJob()" data-k="paid">✓ To'ladim</button></div>
+  </div>
+</div>
+
+<!-- CONTACT REVEAL -->
+<div class="mo" id="m-contact">
+  <div class="md">
+    <h3>✅ <span data-k="paid_ok">To'lov qabul qilindi!</span></h3>
+    <p data-k="emp_info">Ish beruvchining ma'lumotlari:</p>
+    <div class="reveal-box">
+      <div class="rv"><span style="font-size:20px">📞</span><div><div class="rv-lbl" data-k="phone">Telefon</div><div class="rv-val">+992 93 123 45 67</div></div></div>
+      <div class="rv"><span style="font-size:20px">📍</span><div><div class="rv-lbl" data-k="address">Manzil</div><div class="rv-val">Dushanbe, Sino ko'chasi 45</div></div></div>
+      <div class="rv"><span style="font-size:20px">🗺️</span><div><div class="rv-lbl" data-k="location">Lokatsiya</div><div class="rv-val">38.5598° N, 68.7738° E</div></div></div>
+    </div>
+    <div class="map-ph">🗺️<br><span data-k="view_map">Xaritada ko'rish</span></div>
+    <button class="btn-p" style="width:100%;margin-top:14px" onclick="closeM('m-contact')" data-k="done">✓ Tayyor</button>
+  </div>
+</div>
+
+<!-- AD LOCATION -->
+<div class="mo" id="m-loc">
+  <div class="md">
+    <h3>📍 <span data-k="set_loc">Lokatsiya belgilash</span></h3>
+    <p data-k="loc_hint">Xaritada ishni bajarilishi lozim bo'lgan joyni ko'rsating</p>
+    <div class="map-ph" onclick="pickAdLoc()">🗺️<br><span data-k="tap_map">Bosing — joyni belgilang</span></div>
+    <div id="ad-loc-sel" style="display:none" class="loc-show">📍 Dushanbe, Tojikiston</div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn-cl" onclick="closeM('m-loc')" data-k="cancel">Bekor</button>
+      <button class="btn-p" onclick="saveAdLoc()" data-k="save">✓ Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROFILE -->
+<div class="mo" id="m-edit-prof">
+  <div class="md">
+    <h3>✏️ <span data-k="edit_prof">Profilni tahrirlash</span></h3>
+    <div style="height:8px"></div>
+    <div class="form-grp"><label class="form-lbl" data-k="lbl_name">Ism Familiya</label><input class="form-in" id="ep-name" placeholder="Ism Familiyangiz"></div>
+    <div class="form-grp"><label class="form-lbl" data-k="lbl_phone">Telefon raqam</label><input class="form-in" id="ep-phone" type="tel" placeholder="+992 93 123 45 67"></div>
+    <div class="form-grp"><label class="form-lbl" data-k="lbl_city">Yashash joyi (shahar)</label><input class="form-in" id="ep-city" placeholder="Dushanbe, Rudaki tumani"></div>
+    <div class="form-grp"><label class="form-lbl" data-k="lbl_addr">Aniq manzil</label><input class="form-in" id="ep-addr" placeholder="Ko'cha, uy raqami"></div>
+    <div class="form-grp">
+      <label class="form-lbl">📍 <span data-k="lbl_loc">Lokatsiya</span></label>
+      <button class="loc-btn" onclick="pickProfLoc()">📍 <span data-k="loc_btn">GPS orqali aniqlash</span></button>
+      <div class="loc-show" id="ep-loc-show" style="display:none">📍 <span id="ep-loc-txt"></span></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn-cl" onclick="closeM('m-edit-prof')" data-k="cancel">Bekor</button>
+      <button class="btn-p" onclick="saveProf()" data-k="save_prof">✓ Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="mo" id="m-success">
+  <div class="md" style="text-align:center;padding:36px 24px">
+    <div style="font-size:64px;margin-bottom:12px">🎉</div>
+    <h3 data-k="ad_ok">E'lon joylashtirildi!</h3>
+    <p style="margin-bottom:20px" data-k="ad_ok_sub">E'loningiz muvaffaqiyatli qo'shildi</p>
+    <button class="btn-p" onclick="closeM('m-success');go('screen-home');renderAdsList();" data-k="to_home">Bosh sahifaga</button>
+  </div>
+</div>
+
+<!-- PROFILE SAVED -->
+<div class="mo" id="m-prof-saved">
+  <div class="md" style="text-align:center;padding:32px 24px">
+    <div style="font-size:52px;margin-bottom:10px">✅</div>
+    <h3 data-k="prof_saved">Profil saqlandi!</h3>
+    <p style="margin-bottom:18px" data-k="prof_saved_sub">Ma'lumotlaringiz muvaffaqiyatli yangilandi</p>
+    <button class="btn-p" onclick="closeM('m-prof-saved')" data-k="done">✓ Tayyor</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════════════
+   TRANSLATIONS
+══════════════════════════════════════ */
+const LANG = {
+uz:{
+  nav_home:"Bosh sahifa",nav_fav:"Tanlangan",nav_msg:"Xabarlar",nav_prof:"Profil",
+  add_title:"E'lon qo'shish",new_ads:"Yangi e'lonlar",take_job:"Ishni olish",
+  tezkor:"Tezkor",tez_sub:"E'lon yuqorida ko'rinadi — 10 SM",tez_modal_sub:"E'loningiz barcha e'lonlardan yuqorida",
+  c_home:"Uy ishlari",c_field:"Dala ishlari",c_build:"Qurilish",c_help:"Yordamchi",
+  c_daily:"Kunlik ish",c_master:"Usta",c_courier:"Kuryer",c_other:"Boshqalar",c_all:"Barchasi",c_sel:"Tanlang...",
+  lbl_title:"Sarlavha *",lbl_desc:"Tavsif *",lbl_price_type:"Narx turi",lbl_price:"Narx (Somoniy)",
+  lbl_cat:"Kategoriya *",lbl_city:"Shahar",lbl_loc:"Lokatsiya",loc_btn:"Joyni belgilash",
+  lbl_photos:"Rasmlar (5 tagacha)",photo_add:"Qo'shish",
+  p_fixed:"Belgilangan",p_nego:"Kelishamiz",p_free:"Bepul",
+  submit_ad:"✓ E'lonni joylashtirish",
+  settings:"Sozlamalar",lang_lbl:"🌐 Til tanlash",notif:"Bildirishnomalar",dark_mode:"Tungi rejim",
+  member:"Dastyor a'zosi",my_ads:"Mening e'lonlarim",edit_prof:"✏️ Profilni tahrirlash",logout:"Chiqish",
+  fav_empty:"Tanlangan e'lon yo'q",fav_hint:"♥ bosib e'lonlarni saqlang",msg_empty:"Xabarlar yo'q",
+  pay_amt:"To'lov miqdori",tez_note:"To'lovdan so'ng e'lon birinchi qatorga ko'tariladi",
+  cancel:"Bekor",paid:"✓ To'ladim",back:"Orqaga",save:"✓ Saqlash",
+  job_info:"Ish beruvchi ma'lumotlarini ko'rish uchun",job_info2:"xizmat haqi to'lashingiz kerak",
+  job_after:"To'lovdan so'ng telefon, manzil va lokatsiya ochiladi",
+  paid_ok:"To'lov qabul qilindi!",emp_info:"Ish beruvchining ma'lumotlari:",
+  phone:"Telefon",address:"Manzil",location:"Lokatsiya",
+  view_map:"Xaritada ko'rish",done:"✓ Tayyor",
+  set_loc:"Lokatsiya belgilash",loc_hint:"Xaritada joyni ko'rsating",tap_map:"Bosing — joyni belgilang",
+  ad_ok:"E'lon joylashtirildi!",ad_ok_sub:"E'loningiz muvaffaqiyatli qo'shildi",to_home:"Bosh sahifaga",
+  login_title:"Kirish",login_sub:"Telefon raqam yoki ijtimoiy tarmoq orqali kiring",
+  lbl_phone:"Telefon raqam",lbl_pass:"Parol",btn_login:"Kirish →",or:"yoki",
+  no_acc:"Akkount yo'qmi?",reg_link:"Ro'yxatdan o'ting",
+  reg_title:"Ro'yxatdan o'tish",reg_sub:"Yangi akkount yarating",
+  lbl_name:"Ism Familiya",lbl_pass2:"Parolni tasdiqlang",btn_reg:"Ro'yxatdan o'tish →",
+  have_acc:"Akkount bormi?",login_link:"Kiring",lbl_addr:"Aniq manzil",
+  otp_title:"SMS tasdiqlash",otp_hint2:"Demo: istalgan 4 ta raqam kiriting",
+  btn_verify:"Tasdiqlash →",no_sms:"SMS kelmadimi?",resend:"Qayta yuborish",
+  support:"Texnik qo'llab-quvvatlash",support_sub:"Savol bo'lsa, biz bilan bog'laning:",
+  save_prof:"✓ Saqlash",prof_saved:"Profil saqlandi!",prof_saved_sub:"Ma'lumotlaringiz yangilandi",back:"Orqaga"
+},
+tg:{
+  nav_home:"Саҳифаи асосӣ",nav_fav:"Интихобшудагон",nav_msg:"Паёмҳо",nav_prof:"Профил",
+  add_title:"Илова кардани эълон",new_ads:"Эълонҳои нав",take_job:"Гирифтани кор",
+  tezkor:"Зуд",tez_sub:"Эълон болотар — 10 SM",tez_modal_sub:"Эълони шумо дар боло намоиш мешавад",
+  c_home:"Корҳои хона",c_field:"Корҳои саҳроӣ",c_build:"Сохтмон",c_help:"Ёрдамчӣ",
+  c_daily:"Кори рӯзона",c_master:"Устод",c_courier:"Курьер",c_other:"Дигарҳо",c_all:"Ҳама",c_sel:"Интихоб кунед...",
+  lbl_title:"Сарлавҳа *",lbl_desc:"Тавсиф *",lbl_price_type:"Навъи нарх",lbl_price:"Нарх (Сомонӣ)",
+  lbl_cat:"Категория *",lbl_city:"Шаҳр",lbl_loc:"Макон",loc_btn:"Макон нишон диҳед",
+  lbl_photos:"Расмҳо (то 5)",photo_add:"Илова",
+  p_fixed:"Муайяншуда",p_nego:"Мувофиқа",p_free:"Ройгон",
+  submit_ad:"✓ Нашри эълон",
+  settings:"Танзимот",lang_lbl:"🌐 Интихоби забон",notif:"Огоҳиҳо",dark_mode:"Ҳолати шаб",
+  member:"Аъзои Dastyor",my_ads:"Эълонҳои ман",edit_prof:"✏️ Таҳрири профил",logout:"Баромадан",
+  fav_empty:"Эълон нест",fav_hint:"Барои интихоб ♥ пахш кунед",msg_empty:"Паём нест",
+  pay_amt:"Маблағи пардохт",tez_note:"Пас аз пардохт эълон ба аввал мебарояд",
+  cancel:"Бекор",paid:"✓ Пардохтам",back:"Бозгашт",save:"✓ Захира",
+  job_info:"Барои дидани маълумоти корфармо",job_info2:"ҳаққи хидмат пардохт кунед",
+  job_after:"Пас аз пардохт телефон, суроға ва макон кушода мешавад",
+  paid_ok:"Пардохт қабул шуд!",emp_info:"Маълумоти корфармо:",
+  phone:"Телефон",address:"Суроға",location:"Макон",
+  view_map:"Дар харита дидан",done:"✓ Тайёр",
+  set_loc:"Муайян кардани макон",loc_hint:"Дар харита макон нишон диҳед",tap_map:"Ба харита пахш кунед",
+  ad_ok:"Эълон гузошта шуд!",ad_ok_sub:"Эълони шумо бомуваффақият илова шуд",to_home:"Ба саҳифаи асосӣ",
+  login_title:"Воридшавӣ",login_sub:"Тавассути рақами телефон ё шабакаи иҷтимоӣ",
+  lbl_phone:"Рақами телефон",lbl_pass:"Рамз",btn_login:"Воридшавӣ →",or:"ё",
+  no_acc:"Аккаунт надоред?",reg_link:"Бақайдгирӣ",
+  reg_title:"Бақайдгирӣ",reg_sub:"Аккаунти нав созед",
+  lbl_name:"Ном Насаб",lbl_pass2:"Рамзро тасдиқ кунед",btn_reg:"Бақайдгирӣ →",
+  have_acc:"Аккаунт доред?",login_link:"Воридшавӣ",lbl_addr:"Суроғаи дақиқ",
+  otp_title:"Тасдиқи SMS",otp_hint2:"Demo: 4 рақам ворид кунед",
+  btn_verify:"Тасдиқ →",no_sms:"SMS наомад?",resend:"Аз нав фиристодан",
+  support:"Дастгирии техникӣ",support_sub:"Савол дошта бошед, бо мо тамос гиред:",
+  save_prof:"✓ Захира кардан",prof_saved:"Профил захира шуд!",prof_saved_sub:"Маълумотҳои шумо навсозӣ шуд",back:"Бозгашт"
+},
+ru:{
+  nav_home:"Главная",nav_fav:"Избранное",nav_msg:"Сообщения",nav_prof:"Профиль",
+  add_title:"Добавить объявление",new_ads:"Новые объявления",take_job:"Взять работу",
+  tezkor:"Срочно",tez_sub:"Объявление будет вверху — 10 SM",tez_modal_sub:"Ваше объявление будет в самом верху",
+  c_home:"Домашние дела",c_field:"Полевые работы",c_build:"Строительство",c_help:"Помощник",
+  c_daily:"Подёнщик",c_master:"Мастер",c_courier:"Курьер",c_other:"Другие",c_all:"Все",c_sel:"Выберите...",
+  lbl_title:"Заголовок *",lbl_desc:"Описание *",lbl_price_type:"Тип цены",lbl_price:"Цена (Сомони)",
+  lbl_cat:"Категория *",lbl_city:"Город",lbl_loc:"Локация",loc_btn:"Отметить на карте",
+  lbl_photos:"Фото (до 5 штук)",photo_add:"Добавить",
+  p_fixed:"Фиксированная",p_nego:"Договорная",p_free:"Бесплатно",
+  submit_ad:"✓ Разместить объявление",
+  settings:"Настройки",lang_lbl:"🌐 Выбор языка",notif:"Уведомления",dark_mode:"Ночной режим",
+  member:"Участник Dastyor",my_ads:"Мои объявления",edit_prof:"✏️ Редактировать профиль",logout:"Выйти",
+  fav_empty:"Нет избранных",fav_hint:"Нажмите ♥ для сохранения",msg_empty:"Нет сообщений",
+  pay_amt:"Сумма оплаты",tez_note:"После оплаты объявление поднимается на первое место",
+  cancel:"Отмена",paid:"✓ Оплатил",back:"Назад",save:"✓ Сохранить",
+  job_info:"Чтобы увидеть данные работодателя",job_info2:"оплатите комиссию",
+  job_after:"После оплаты откроется телефон, адрес и локация",
+  paid_ok:"Оплата принята!",emp_info:"Данные работодателя:",
+  phone:"Телефон",address:"Адрес",location:"Локация",
+  view_map:"Посмотреть на карте",done:"✓ Готово",
+  set_loc:"Указать локацию",loc_hint:"Укажите место на карте",tap_map:"Нажмите на карту",
+  ad_ok:"Объявление размещено!",ad_ok_sub:"Ваше объявление успешно добавлено",to_home:"На главную",
+  login_title:"Вход",login_sub:"Войдите по номеру телефона или соцсети",
+  lbl_phone:"Номер телефона",lbl_pass:"Пароль",btn_login:"Войти →",or:"или",
+  no_acc:"Нет аккаунта?",reg_link:"Зарегистрироваться",
+  reg_title:"Регистрация",reg_sub:"Создайте новый аккаунт",
+  lbl_name:"Имя Фамилия",lbl_pass2:"Подтвердите пароль",btn_reg:"Зарегистрироваться →",
+  have_acc:"Уже есть аккаунт?",login_link:"Войти",lbl_addr:"Точный адрес",
+  otp_title:"Подтверждение SMS",otp_hint2:"Для демо введите любые 4 цифры",
+  btn_verify:"Подтвердить →",no_sms:"Не пришло SMS?",resend:"Отправить снова",
+  support:"Техподдержка",support_sub:"Есть вопросы? Напишите нам:",
+  save_prof:"✓ Сохранить",prof_saved:"Профиль сохранён!",prof_saved_sub:"Ваши данные успешно обновлены",back:"Назад"
+},
+en:{
+  nav_home:"Home",nav_fav:"Saved",nav_msg:"Messages",nav_prof:"Profile",
+  add_title:"Post a Job",new_ads:"New Listings",take_job:"Apply",
+  tezkor:"Urgent",tez_sub:"Listing will appear at top — 10 SM",tez_modal_sub:"Your listing will be at the very top",
+  c_home:"Housework",c_field:"Field Work",c_build:"Construction",c_help:"Assistant",
+  c_daily:"Day Labour",c_master:"Handyman",c_courier:"Courier",c_other:"Others",c_all:"All",c_sel:"Select...",
+  lbl_title:"Title *",lbl_desc:"Description *",lbl_price_type:"Price Type",lbl_price:"Price (Somoni)",
+  lbl_cat:"Category *",lbl_city:"City",lbl_loc:"Location",loc_btn:"Pin on map",
+  lbl_photos:"Photos (up to 5)",photo_add:"Add",
+  p_fixed:"Fixed",p_nego:"Negotiable",p_free:"Free",
+  submit_ad:"✓ Post Listing",
+  settings:"Settings",lang_lbl:"🌐 Language",notif:"Notifications",dark_mode:"Dark Mode",
+  member:"Dastyor Member",my_ads:"My Listings",edit_prof:"✏️ Edit Profile",logout:"Sign Out",
+  fav_empty:"No saved jobs",fav_hint:"Tap ♥ to save listings",msg_empty:"No messages",
+  pay_amt:"Payment Amount",tez_note:"After payment listing rises to first position",
+  cancel:"Cancel",paid:"✓ Paid",back:"Back",save:"✓ Save",
+  job_info:"To view employer details",job_info2:"pay the service fee",
+  job_after:"After payment phone, address and location will be revealed",
+  paid_ok:"Payment received!",emp_info:"Employer details:",
+  phone:"Phone",address:"Address",location:"Location",
+  view_map:"View on map",done:"✓ Done",
+  set_loc:"Set Location",loc_hint:"Tap on the map to mark location",tap_map:"Tap to mark location",
+  ad_ok:"Listing Posted!",ad_ok_sub:"Your listing was successfully added",to_home:"Go to Home",
+  login_title:"Sign In",login_sub:"Sign in with your phone or social account",
+  lbl_phone:"Phone Number",lbl_pass:"Password",btn_login:"Sign In →",or:"or",
+  no_acc:"Don't have an account?",reg_link:"Sign Up",
+  reg_title:"Sign Up",reg_sub:"Create a new account",
+  lbl_name:"Full Name",lbl_pass2:"Confirm Password",btn_reg:"Sign Up →",
+  have_acc:"Already have an account?",login_link:"Sign In",lbl_addr:"Exact Address",
+  otp_title:"SMS Verification",otp_hint2:"Demo: enter any 4 digits",
+  btn_verify:"Verify →",no_sms:"Didn't receive SMS?",resend:"Resend",
+  support:"Support",support_sub:"Have a question? Contact us:",
+  save_prof:"✓ Save",prof_saved:"Profile Saved!",prof_saved_sub:"Your information was updated",back:"Back"
+}
+};
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let lang = localStorage.getItem('dd_lang') || 'uz';
+let user = null;
+let photos = [];
+let tezOn = false;
+let currentCat = 'all'; // active category filter
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  applyLang(lang);
+  const saved = localStorage.getItem('dd_user');
+  if (saved) { try { user = JSON.parse(saved); } catch(e){} }
+  setTimeout(() => {
+    document.getElementById('screen-splash').classList.remove('active');
+    go(user ? 'screen-home' : 'screen-login');
+    renderAdsList();
+  }, 1600);
+});
+
+/* ══════════════════════════════════════
+   LANGUAGE
+══════════════════════════════════════ */
+function applyLang(l) {
+  lang = l;
+  localStorage.setItem('dd_lang', l);
+  const d = LANG[l] || LANG.uz;
+  document.querySelectorAll('[data-k]').forEach(el => {
+    const k = el.getAttribute('data-k');
+    if (d[k] != null) el.textContent = d[k];
+  });
+  document.querySelectorAll('.lang-btn').forEach((b,i) => {
+    b.classList.toggle('act', ['uz','tg','ru','en'][i] === l);
+  });
+  // update photo add btn text
+  var pab = document.getElementById('photo-add-btn');
+  if (pab) {
+    var pabSpan = pab.querySelector('span');
+    if (pabSpan) pabSpan.textContent = d.photo_add || "Qo'shish";
+  }
+}
+function setLang(l) { applyLang(l); }
+
+/* ══════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════ */
+function go(id) {
+  if (id === 'screen-add' && !user) {
+    alert('E\'lon qo\'shish uchun tizimga kiring!');
+    id = 'screen-login';
+  }
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  var sc = document.getElementById(id);
+  if (sc) sc.classList.add('active');
+  window.scrollTo(0, 0);
+  // Har safar bosh sahifaga o'tilganda e'lonlarni yangilash
+  if (id === 'screen-home') {
+    setTimeout(function(){ renderAdsList(); }, 50);
+  }
+}
+
+/* ══════════════════════════════════════
+   AUTH — LOGIN
+══════════════════════════════════════ */
+function doLogin() {
+  const code = document.getElementById('login-code').value;
+  const phone = document.getElementById('login-phone').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-err');
+
+  if (phone.length < 7) { showErr(err, LANG[lang].lbl_phone + ' — xato!'); return; }
+  err.style.display = 'none';
+
+  const fullPhone = code + ' ' + phone;
+  const users = getUsers();
+  let found = users.find(u => u.phone === fullPhone);
+
+  if (!found) {
+    // Auto-register if not found
+    found = { name: 'Foydalanuvchi', phone: fullPhone, pass, av: '' };
+    users.push(found);
+    saveUsers(users);
+  } else if (found.pass && pass && found.pass !== pass) {
+    showErr(err, 'Parol noto\'g\'ri!');
+    return;
+  }
+
+  user = found;
+  localStorage.setItem('dd_user', JSON.stringify(user));
+  updateProfUI();
+  go('screen-home');
+}
+
+/* ══════════════════════════════════════
+   AUTH — REGISTER
+══════════════════════════════════════ */
+function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const code = document.getElementById('reg-code').value;
+  const phone = document.getElementById('reg-phone').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const pass2 = document.getElementById('reg-pass2').value;
+  const err = document.getElementById('reg-err');
+
+  if (!name) { showErr(err, 'Ism kiritilmadi!'); return; }
+  if (phone.length < 7) { showErr(err, 'Telefon noto\'g\'ri!'); return; }
+  if (pass.length < 6) { showErr(err, 'Parol kamida 6 belgi!'); return; }
+  if (pass !== pass2) { showErr(err, 'Parollar mos emas!'); return; }
+
+  const fullPhone = code + ' ' + phone;
+  const existingUsers = getUsers();
+  if (existingUsers.find(u => u.phone === fullPhone)) {
+    showErr(err, 'Bu telefon allaqachon ro\'yxatdan o\'tgan!'); return;
+  }
+  err.style.display = 'none';
+
+  // Generate OTP code
+  const otp = String(Math.floor(1000 + Math.random() * 9000));
+  localStorage.setItem('dd_otp', otp);
+  localStorage.setItem('dd_otp_exp', Date.now() + 5 * 60 * 1000); // 5 min
+  localStorage.setItem('dd_pending', JSON.stringify({ name, phone: fullPhone, pass, av: '' }));
+
+  document.getElementById('otp-hint').textContent = fullPhone + ' ga SMS yuborildi';
+
+  // Demo: show code in popup (real app uses SMS API like Eskiz.uz/Twilio)
+  setTimeout(() => {
+    if (confirm('📱 SMS Kodi (Demo rejim):\n\n🔑 ' + otp + '\n\nHaqiqiy ilovada bu kod SMS orqali yuboriladi.\n\nOK bosib kodni nusxalang!')) {}
+  }, 400);
+
+  go('screen-otp');
+}
+
+function verifyOTP() {
+  const entered = [0,1,2,3].map(i => document.getElementById('o'+i).value).join('');
+  if (entered.length < 4) { alert('4 raqamli kodni kiriting!'); return; }
+
+  const saved = localStorage.getItem('dd_otp');
+  const exp = parseInt(localStorage.getItem('dd_otp_exp') || '0');
+
+  if (Date.now() > exp) {
+    alert(lang==='ru'?'Код истёк. Повторите попытку.':lang==='en'?'Code expired. Try again.':'Kod muddati o\'tdi. Qayta yuborib ko\'ring.');
+    go('screen-register'); return;
+  }
+  if (entered !== saved) {
+    alert(lang==='ru'?'Неверный код!':lang==='en'?'Wrong code!':'Noto\'g\'ri kod!');
+    [0,1,2,3].forEach(i => { document.getElementById('o'+i).value = ''; });
+    document.getElementById('o0').focus();
+    return;
+  }
+
+  const pending = JSON.parse(localStorage.getItem('dd_pending') || 'null');
+  if (!pending) { go('screen-login'); return; }
+  const users = getUsers();
+  users.push(pending);
+  saveUsers(users);
+  user = pending;
+  localStorage.setItem('dd_user', JSON.stringify(user));
+  localStorage.removeItem('dd_pending');
+  localStorage.removeItem('dd_otp');
+  localStorage.removeItem('dd_otp_exp');
+  [0,1,2,3].forEach(i => { document.getElementById('o'+i).value = ''; });
+  updateProfUI();
+  go('screen-home');
+}
+
+function resendOTP() {
+  const pending = JSON.parse(localStorage.getItem('dd_pending') || 'null');
+  if (!pending) { go('screen-register'); return; }
+  const otp = String(Math.floor(1000 + Math.random() * 9000));
+  localStorage.setItem('dd_otp', otp);
+  localStorage.setItem('dd_otp_exp', Date.now() + 5 * 60 * 1000);
+  setTimeout(() => {
+    alert('📱 Yangi SMS Kodi:\n\n🔑 ' + otp);
+  }, 200);
+}
+
+function oNext(el, i) {
+  if (el.value.length === 1 && i < 3) document.getElementById('o'+(i+1)).focus();
+}
+
+function socialLogin(provider) {
+  user = { name: provider + ' foydalanuvchi', phone: '', pass: '', av: '' };
+  const users = getUsers();
+  users.push(user);
+  saveUsers(users);
+  localStorage.setItem('dd_user', JSON.stringify(user));
+  updateProfUI();
+  go('screen-home');
+}
+
+function doLogout() {
+  const d = LANG[lang];
+  if (!confirm(lang === 'ru' ? 'Вы уверены?' : lang === 'en' ? 'Are you sure?' : 'Rostdan ham chiqmoqchimisiz?')) return;
+  user = null;
+  localStorage.removeItem('dd_user');
+  go('screen-login');
+}
+
+/* ══════════════════════════════════════
+   PROFILE UI
+══════════════════════════════════════ */
+function updateProfUI() {
+  if (!user) return;
+  const n = user.name || 'Foydalanuvchi';
+  const el = document.getElementById('prof-name');
+  if (el) el.textContent = n;
+  const ph = document.getElementById('prof-phone');
+  if (ph) ph.textContent = user.phone || '';
+  // avatar
+  const av = document.getElementById('av-el');
+  if (av) {
+    if (user.av) {
+      av.innerHTML = '<img src="'+user.av+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    } else {
+      av.innerHTML = '<span id="av-letter">'+(n[0]||'U').toUpperCase()+'</span>';
+    }
+  }
+  // location
+  if (user.city) {
+    const lShow = document.getElementById('prof-loc');
+    const lTxt = document.getElementById('prof-loc-txt');
+    if (lShow && lTxt) { lTxt.textContent = user.city; lShow.style.display = 'block'; }
+  }
+}
+
+function setAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  // Warn if file too large
+  if (file.size > 2 * 1024 * 1024) {
+    alert(lang==='ru'?'Размер фото не должен превышать 2 МБ':lang==='en'?'Photo must be under 2MB':'Rasm hajmi 2 MB dan oshmasin!');
+    input.value = ''; return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const src = e.target.result;
+    const av = document.getElementById('av-el');
+    if (av) av.innerHTML = '<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+    if (user) {
+      user.av = src;
+      try {
+        localStorage.setItem('dd_user', JSON.stringify(user));
+      } catch(err) {
+        // localStorage full — save without avatar
+        const userNoAv = Object.assign({}, user, {av:''});
+        localStorage.setItem('dd_user', JSON.stringify(userNoAv));
+        alert(lang==='ru'?'Фото сохранено только в текущей сессии (мало памяти)':lang==='en'?'Photo saved for this session only (storage full)':'Rasm faqat hozirgi sessiyada saqlanadi (xotira to\'la)');
+      }
+    }
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function openEditProf() {
+  if (user) {
+    document.getElementById('ep-name').value = user.name || '';
+    document.getElementById('ep-phone').value = user.phone || '';
+    document.getElementById('ep-city').value = user.city || '';
+    document.getElementById('ep-addr').value = user.addr || '';
+    if (user.locText) {
+      document.getElementById('ep-loc-show').style.display = 'flex';
+      document.getElementById('ep-loc-txt').textContent = user.locText;
+    } else {
+      document.getElementById('ep-loc-show').style.display = 'none';
+    }
+  }
+  openM('m-edit-prof');
+}
+
+function pickProfLoc() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => setLocText(pos.coords.latitude.toFixed(4)+'° N, '+pos.coords.longitude.toFixed(4)+'° E'),
+      () => setLocText('Dushanbe, Tojikiston')
+    );
+  } else { setLocText('Dushanbe, Tojikiston'); }
+}
+function setLocText(txt) {
+  document.getElementById('ep-loc-show').style.display = 'flex';
+  document.getElementById('ep-loc-txt').textContent = txt;
+  if (!user) user = {};
+  user.locText = txt;
+}
+
+function saveProf() {
+  if (!user) user = {};
+  const n = document.getElementById('ep-name').value.trim();
+  const ph = document.getElementById('ep-phone').value.trim();
+  const city = document.getElementById('ep-city').value.trim();
+  const addr = document.getElementById('ep-addr').value.trim();
+  if (n) user.name = n;
+  if (ph) user.phone = ph;
+  if (city) user.city = city;
+  if (addr) user.addr = addr;
+  localStorage.setItem('dd_user', JSON.stringify(user));
+  updateProfUI();
+  closeM('m-edit-prof');
+  openM('m-prof-saved');
+}
+
+/* ══════════════════════════════════════
+   CATEGORY & FORM
+══════════════════════════════════════ */
+function selCat(el, catKey) {
+  document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('act'));
+  el.classList.add('act');
+  currentCat = catKey || 'all';
+  renderAdsList();
+}
+function selPrice(el) {
+  document.querySelectorAll('.price-btn').forEach(b => b.classList.remove('act'));
+  el.classList.add('act');
+}
+
+/* ══════════════════════════════════════
+   PHOTO UPLOAD
+══════════════════════════════════════ */
+function addPhotos(input) {
+  const files = Array.from(input.files).slice(0, 5 - photos.length);
+  files.forEach(function(f) {
+    if (f.size > 3 * 1024 * 1024) {
+      alert(lang==='ru'?'Файл слишком большой (макс. 3 МБ)':lang==='en'?'File too large (max 3MB)':'Fayl hajmi katta (max 3 MB)!');
+      return;
+    }
+    const r = new FileReader();
+    r.onload = function(e) { photos.push(e.target.result); renderPhotos(); };
+    r.readAsDataURL(f);
+  });
+  input.value = '';
+}
+function delPhoto(i) { photos.splice(i,1); renderPhotos(); }
+function renderPhotos() {
+  const row = document.getElementById('photo-row');
+  if (!row) return;
+  row.innerHTML = '';
+  photos.forEach((src,i) => {
+    const d = document.createElement('div');
+    d.className = 'photo-th';
+    d.innerHTML = '<img src="'+src+'"><button class="photo-del" onclick="delPhoto('+i+')">✕</button>';
+    row.appendChild(d);
+  });
+  if (photos.length < 5) {
+    const b = document.createElement('button');
+    b.className = 'photo-add';
+    b.id = 'photo-add-btn';
+    b.onclick = () => document.getElementById('ph-file').click();
+    b.innerHTML = '📷<br><span>'+(LANG[lang].photo_add||'Qo\'shish')+'</span>';
+    row.appendChild(b);
+  }
+}
+
+/* ══════════════════════════════════════
+   TEZKOR
+══════════════════════════════════════ */
+function togTez() {
+  tezOn = !tezOn;
+  document.getElementById('tez-tog').classList.toggle('on', tezOn);
+  if (tezOn) openM('m-tez');
+}
+function confirmTez() { closeM('m-tez'); openM('m-success'); }
+
+/* ══════════════════════════════════════
+   SUBMIT AD
+══════════════════════════════════════ */
+async function submitAd() {
+  try {
+    // 1. Login tekshiruvi
+    if (!user) {
+      alert('E\'lon qo\'shish uchun tizimga kiring!');
+      go('screen-login');
+      return;
+    }
+
+    // 2. Sarlavha majburiy
+    var titleEl = document.getElementById('ad-title');
+    if (!titleEl || !titleEl.value.trim()) {
+      alert('Sarlavha kiriting!');
+      if (titleEl) titleEl.focus();
+      return;
+    }
+
+    var title    = titleEl.value.trim();
+    var descEl   = document.getElementById('ad-desc');
+    var desc     = descEl ? descEl.value.trim() : '';
+    var priceEl  = document.getElementById('ad-price');
+    var price    = priceEl ? priceEl.value.trim() : '';
+    var cityEl   = document.getElementById('ad-city');
+    var city     = cityEl ? cityEl.value.trim() : 'Dushanbe';
+    var catEl    = document.getElementById('ad-cat');
+    var cat      = catEl ? catEl.value || 'other' : 'other';
+    var catLabel = catEl ? catEl.options[catEl.selectedIndex].textContent.trim() : '';
+    var locEl    = document.getElementById('ad-loc-text');
+    var locText  = locEl ? locEl.textContent.trim() : '';
+
+    var wasTez = tezOn;
+
+    // 3. E'lon obyekti
+    var ad = {
+      title:    title,
+      desc:     desc,
+      price:    price,
+      city:     city || 'Dushanbe',
+      cat:      cat,
+      catLabel: catLabel,
+      locText:  locText,
+      photos:   photos.slice(),
+      tezkor:   wasTez,
+      author:   (user && user.name) ? user.name : 'Foydalanuvchi',
+      phone:    (user && user.phone) ? user.phone : ''
+    };
+
+    // 4. Supabase ga saqlash
+    const saved = await saveAdToSupabase(ad);
+    if (!saved) {
+      alert('E\'lonni saqlashda xato yuz berdi. Iltimos qayta urinib ko\'ring.');
+      return;
+    }
+
+    // 5. Formani tozalash
+    titleEl.value = '';
+    if (descEl) descEl.value = '';
+    if (priceEl) priceEl.value = '';
+    if (cityEl) cityEl.value = 'Dushanbe';
+    if (catEl) catEl.selectedIndex = 0;
+    var locShow = document.getElementById('ad-loc-show');
+    if (locShow) locShow.style.display = 'none';
+    photos = [];
+    renderPhotos();
+    tezOn = false;
+    var tezTog = document.getElementById('tez-tog');
+    if (tezTog) tezTog.classList.remove('on');
+
+    // 6. Ro'yxatni yangilash
+    renderAdsList();
+
+    // 7. Modal
+    if (wasTez) { openM('m-tez'); } else { openM('m-success'); }
+
+  } catch(err) {
+    alert('Xato yuz berdi: ' + err.message);
+    console.error('submitAd error:', err);
+  }
+}
+
+/* ══════════════════════════════════════
+   TAKE JOB
+══════════════════════════════════════ */
+function openJob(title, price) {
+  document.getElementById('job-title').textContent = '🤝 ' + title;
+  document.getElementById('job-fee').textContent = Math.ceil(+price * .1) + ' SM';
+  openM('m-job');
+}
+function confirmJob() { closeM('m-job'); openM('m-contact'); }
+
+/* ══════════════════════════════════════
+   LOCATION (AD FORM)
+══════════════════════════════════════ */
+function pickAdLoc() {
+  const sel = document.getElementById('ad-loc-sel');
+  sel.style.display = 'flex';
+  sel.textContent = '⏳ Lokatsiya aniqlanmoqda...';
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      p => {
+        const lat = p.coords.latitude.toFixed(4);
+        const lng = p.coords.longitude.toFixed(4);
+        sel.textContent = '📍 ' + lat + '°N, ' + lng + '°E';
+      },
+      err => {
+        sel.textContent = '📍 Dushanbe, Tojikiston';
+        console.warn('Geo error:', err.message);
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  } else {
+    sel.textContent = '📍 Dushanbe, Tojikiston';
+  }
+}
+function saveAdLoc() {
+  closeM('m-loc');
+  document.getElementById('ad-loc-show').style.display = 'flex';
+  const sel = document.getElementById('ad-loc-sel');
+  document.getElementById('ad-loc-text').textContent = sel.textContent.replace('📍 ','') || 'Dushanbe';
+}
+
+/* ══════════════════════════════════════
+   ACCORDION
+══════════════════════════════════════ */
+function togAcc(id) {
+  document.getElementById('body-'+id).classList.toggle('open');
+  document.getElementById('chev-'+id).classList.toggle('open');
+}
+
+/* ══════════════════════════════════════
+   FAVORITES
+══════════════════════════════════════ */
+function togFav(btn) { btn.textContent = btn.textContent === '🤍' ? '❤️' : '🤍'; }
+
+/* ══════════════════════════════════════
+   MODALS
+══════════════════════════════════════ */
+function openM(id) { const m = document.getElementById(id); if(m) m.classList.add('open'); }
+function closeM(id) { const m = document.getElementById(id); if(m) m.classList.remove('open'); }
+
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('mo')) e.target.classList.remove('open');
+});
+
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function showErr(el, msg) { el.textContent = msg; el.style.display = 'block'; }
+function getUsers() { try { return JSON.parse(localStorage.getItem('dd_users')||'[]'); } catch(e){return[];} }
+function saveUsers(arr) { localStorage.setItem('dd_users', JSON.stringify(arr)); }
+
+/* ══════════════════════════════════════
+   SUPABASE: READ ADS
+══════════════════════════════════════ */
+async function getAdsFromSupabase() {
+  try {
+    const { data, error } = await window.supabaseClient
+      .from('ads')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) { console.error('Supabase getAds error:', error); return []; }
+    return data || [];
+  } catch(e) { console.error('getAdsFromSupabase exception:', e); return []; }
+}
+
+/* ══════════════════════════════════════
+   SUPABASE: INSERT AD
+══════════════════════════════════════ */
+async function saveAdToSupabase(ad) {
+  try {
+    const { data, error } = await window.supabaseClient
+      .from('ads')
+      .insert([{
+        title:     ad.title,
+        desc:      ad.desc,
+        price:     ad.price,
+        city:      ad.city,
+        cat:       ad.cat,
+        cat_label: ad.catLabel,
+        loc_text:  ad.locText,
+        photos:    ad.photos,
+        tezkor:    ad.tezkor,
+        author:    ad.author,
+        phone:     ad.phone
+      }])
+      .select();
+    if (error) { console.error('Supabase saveAd error:', error); return null; }
+    return data ? data[0] : null;
+  } catch(e) { console.error('saveAdToSupabase exception:', e); return null; }
+}
+
+/* ══════════════════════════════════════
+   SUPABASE CONFIGURATION
+   ——————————————————————————————————————
+   Quyidagi o'zgaruvchilarga o'z
+   kalitlaringizni joylashtiring:
+   https://app.supabase.com → Settings → API
+══════════════════════════════════════ */
+const SUPABASE_URL      = 'YOUR_SUPABASE_URL_HERE';       // masalan: https://xyzxyz.supabase.co
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';  // masalan: eyJhbGci...
+
+window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const CAT_EMOJI = {home:'✨',field:'🌾',build:'🔨',help:'🤝',daily:'⏱️',master:'🔧',courier:'🚗',other:'📋'};
+
+// Sample/demo ads displayed before real ads exist
+const SAMPLE_ADS = [
+  {id:-1, title:'Yer chopish', price:'100', city:'Dushanbe', cat:'field', catLabel:'Dala ishlari',
+   author:'Tursunmurod', phone:'+992 93 123 45 67', locText:'', photos:[], tezkor:false, date:'01.01.2025'},
+  {id:-2, title:'Kvartira tozalash', price:'80', city:'Dushanbe', cat:'home', catLabel:'Uy ishlari',
+   author:'Anonym', phone:'+992 93 000 00 01', locText:'', photos:[], tezkor:true, date:'01.01.2025'}
+];
+
+function makeAdCard(ad) {
+  const card = document.createElement('div');
+  card.className = 'ad-card';
+  let imgHtml;
+  if (ad.photos && ad.photos.length > 0) {
+    imgHtml = '<div style="overflow:hidden;"><img src="'+ad.photos[0]+'" style="width:100%;height:140px;object-fit:cover;display:block;"></div>';
+  } else {
+    imgHtml = '<div class="ad-img">'+(CAT_EMOJI[ad.cat]||'📋')+'</div>';
+  }
+  const safeTitle = (ad.title||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  card.innerHTML =
+    (ad.tezkor ? '<div class="ad-badge">⚡ Tezkor</div>' : '') +
+    imgHtml +
+    '<button class="fav-btn" onclick="togFav(this)">🤍</button>'+
+    '<div class="ad-body">'+
+      '<div class="ad-title">'+(ad.title||'')+'</div>'+
+      '<div class="ad-price">'+(ad.price ? ad.price+' SM' : 'Kelishamiz')+'</div>'+
+      '<div class="ad-meta"><span>📍 '+(ad.city||'Dushanbe')+'</span><span>👤 '+(ad.author||'')+'</span></div>'+
+      '<div class="ad-acts">'+
+        '<button class="btn-p" onclick="openJob(\''+safeTitle+'\',\''+(ad.price||0)+'\')">Ishni olish</button>'+
+        '<button class="btn-s">💬</button>'+
+      '</div>'+
+    '</div>';
+  return card;
+}
+
+async function renderAdsList() {
+  const list = document.getElementById('ads-list');
+  if (!list) return;
+  list.innerHTML = '<div class="empty" style="padding:40px 0 20px;"><div style="font-size:36px">⏳</div><div style="font-size:14px;color:var(--tx2);margin-top:8px">Yuklanmoqda...</div></div>';
+  const userAds = await getAdsFromSupabase();
+  const allAds = userAds.length > 0 ? userAds : SAMPLE_ADS;
+  const filtered = (currentCat === 'all')
+    ? allAds
+    : allAds.filter(function(ad){ return ad.cat === currentCat; });
+  list.innerHTML = '';
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty" style="padding:40px 0 20px;">'+
+      '<div style="font-size:50px">🔍</div>'+
+      '<div style="font-size:15px;font-weight:800;color:var(--nv);margin-top:10px">Bu kategoriyada e\'lon yo\'q</div>'+
+      '<div style="font-size:13px;color:var(--tx2);margin-top:6px">Birinchi bo\'lib e\'lon joylang!</div>'+
+      '</div>';
+    const cnt = document.querySelector('.ads-cnt');
+    if (cnt) cnt.textContent = '0 ta';
+    return;
+  }
+  filtered.forEach(function(ad){ list.appendChild(makeAdCard(ad)); });
+  const cnt = document.querySelector('.ads-cnt');
+  if (cnt) cnt.textContent = filtered.length + ' ta';
+}
+</script>
+</body>
+</html>
