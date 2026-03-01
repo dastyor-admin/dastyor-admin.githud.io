@@ -1658,11 +1658,9 @@ function renderAdsList() {
     const cnt = document.querySelector('.ads-cnt');
     if (cnt) cnt.textContent = '0 ta';
     return;
-  }
-  filtered.forEach(function(ad){ list.appendChild(makeAdCard(ad)); });
-  const cnt = document.querySelector('.ads-cnt');
-  if (cnt) cnt.textContent = filtered.length + ' ta';
 }
+   const SUPABASE_URL = 'https://uuwgjnvbrovowkstjwms.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_NQ9WtFgaG0WteLIY-OHTNw_ZFcDsz57';
 </script>
 </body>
 </html>
