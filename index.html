@@ -1707,27 +1707,5 @@ async function renderAdsList() {
     }
 });
 </script>
-<script src="js/auth-helper.js"></script>
-<script>
-// Тест учун тез кириш тугмаси
-(function() {
-    if (window.location.pathname.includes('index') || window.location.pathname === '/') {
-        setTimeout(() => {
-            const footer = document.querySelector('.bot-nav');
-            if (footer) {
-                const testBtn = document.createElement('div');
-                testBtn.style.cssText = 'position:fixed; bottom:80px; left:10px; background:#3b82f6; color:white; padding:8px 16px; border-radius:20px; font-size:12px; cursor:pointer; z-index:1000;';
-                testBtn.innerHTML = '🔑 Тест кириш';
-                testBtn.onclick = function() {
-                    const phone = prompt('Телефон рақам (масалан: +992 93 123 45 67):', '+992 93 123 45 67');
-                    if (phone) quickLogin(phone);
-                };
-                document.body.appendChild(testBtn);
-            }
-        }, 2000);
-    }
-})();
-</script>
-```
 </body>
 </html>
