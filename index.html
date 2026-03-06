@@ -1706,6 +1706,21 @@ async function renderAdsList() {
   if (cnt) cnt.textContent = filtered.length + ' ta'
     }
 });
+// 1. Саҳифа юкланиши билан маълумотларни базадан оламиз
+window.addEventListener('DOMContentLoaded', () => {
+    console.log("Supabase-дан маълумотлар юкланмоқда...");
+    if (typeof loadAdsFromSupabase === 'function') {
+        loadAdsFromSupabase();
+    }
+});
+
+// 2. Жонли янгиланиш (Бошқа тел эълон қўшса, автоматик чиқади)
+_supa.channel('public:ads')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'ads' }, (payload) => {
+    console.log('Янги эълон келди!', payload.new);
+    loadAdsFromSupabase();
+  })
+  .subscribe();
 </script>
 </body>
 </html>
