@@ -1706,12 +1706,15 @@ async function renderAdsList() {
   if (cnt) cnt.textContent = filtered.length + ' ta'
     }
 });
-// 1. Саҳифа юкланиши билан маълумотларни базадан оламиз
-window.addEventListener('DOMContentLoaded', () => {
-    console.log("Supabase-дан маълумотлар юкланмоқда...");
+// Эски DOMContentLoaded ўрнига шуни қўйинг:
+window.onload = () => {
+    console.log("Илова тўлиқ юкланди...");
     if (typeof loadAdsFromSupabase === 'function') {
         loadAdsFromSupabase();
+    } else {
+        console.error("Хато: loadAdsFromSupabase функцияси топилмади!");
     }
+};
 });
 
 // 2. Жонли янгиланиш (Бошқа тел эълон қўшса, автоматик чиқади)
